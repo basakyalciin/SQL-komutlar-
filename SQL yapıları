@@ -1,0 +1,529 @@
+1. IF...ELSE — Koşullu İfade
+
+SQL Server:
+IF koşul THEN bloğu çalışır, ELSE bloğu koşul sağlanmazsa çalışır.
+
+Örnek:
+IF (SELECT COUNT(*) FROM musteriler WHERE yas > 30) > 5
+BEGIN
+    PRINT '30 yaşın üzerinde 5ten fazla müşteri var';
+END
+ELSE
+BEGIN
+    PRINT '30 yaşın üzerinde 5ten az müşteri var';
+END
+
+MySQL:
+IF koşul THEN ... ELSE ... END IF; (sadece stored procedure içinde)
+
+Örnek:
+DELIMITER //
+CREATE PROCEDURE Kontrol()
+BEGIN
+    IF (SELECT COUNT(*) FROM urunler WHERE fiyat > 100) > 10 THEN
+        SELECT 'Pahalı ürün sayısı 10dan fazla';
+    ELSE
+        SELECT 'Pahalı ürün sayısı 10dan az';
+    END IF;
+END //
+DELIMITER ;
+
+PostgreSQL:
+IF koşul THEN ... ELSE ... END IF; (DO bloğu veya fonksiyon içinde)
+
+Örnek:
+DO $$
+BEGIN
+    IF (SELECT COUNT(*) FROM calisanlar WHERE maas > 5000) > 3 THEN
+        RAISE NOTICE 'Maaşı 5000den fazla 3ten fazla çalışan var';
+    ELSE
+        RAISE NOTICE 'Maaşı 5000den fazla 3ten az çalışan var';
+    END IF;
+END $$;
+
+Oracle:
+IF koşul THEN ... ELSE ... END IF; (PL/SQL içinde)
+
+Örnek:
+BEGIN
+    IF (SELECT COUNT(*) FROM siparisler WHERE tarih > SYSDATE - 7) > 20 THEN
+        DBMS_OUTPUT.PUT_LINE('Son 7 günde 20den fazla sipariş var');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Son 7 günde 20den az sipariş var');
+    END IF;
+END;
+
+---
+
+2. CASE — Koşullu Seçim
+
+SQL Server / MySQL / PostgreSQL / Oracle:
+CASE WHEN koşul THEN sonuç ELSE varsayılan END
+
+Örnek:
+SELECT ad, yas,
+CASE
+    WHEN yas < 18 THEN 'Çocuk'
+    WHEN yas BETWEEN 18 AND 65 THEN 'Yetişkin'
+    ELSE 'Yaşlı'
+END AS 'Yaş Grubu'
+FROM musteriler;
+
+Sadece bir sütun için:
+SELECT ad,
+CASE cinsiyet
+    WHEN 'E' THEN 'Erkek'
+    WHEN 'K' THEN 'Kadın'
+    ELSE 'Belirsiz'
+END AS 'Cinsiyet'
+FROM calisanlar;
+
+---
+
+3. WHILE — Döngü
+
+SQL Server:
+WHILE koşul BEGIN ... END
+
+Örnek:
+DECLARE @sayac INT = 1;
+WHILE @sayac <= 5
+BEGIN
+    PRINT 'Sayı: ' + CAST(@sayac AS VARCHAR);
+    SET @sayac = @sayac + 1;
+END
+
+MySQL:
+WHILE koşul DO ... END WHILE; (sadece stored procedure içinde)
+
+Örnek:
+DELIMITER //
+CREATE PROCEDURE Say()
+BEGIN
+    DECLARE sayac INT DEFAULT 1;
+    WHILE sayac <= 5 DO
+        SELECT CONCAT('Sayı: ', sayac);
+        SET sayac = sayac + 1;
+    END WHILE;
+END //
+DELIMITER ;
+
+PostgreSQL:
+WHILE koşul LOOP ... END LOOP; (DO bloğu veya fonksiyon içinde)
+
+Örnek:
+DO $$
+DECLARE
+    sayac INT := 1;
+BEGIN
+    WHILE sayac <= 5 LOOP
+        RAISE NOTICE 'Sayı: %', sayac;
+        sayac := sayac + 1;
+    END LOOP;
+END $$;
+
+Oracle:
+WHILE koşul LOOP ... END LOOP; (PL/SQL içinde)
+
+Örnek:
+DECLARE
+    sayac NUMBER := 1;
+BEGIN
+    WHILE sayac <= 5 LOOP
+        DBMS_OUTPUT.PUT_LINE('Sayı: ' || sayac);
+        sayac := sayac + 1;
+    END LOOP;
+END;
+
+---
+
+4. GOTO — Atlama Komutu
+
+SQL Server:
+GOTO etiket; — Program akışını belirli bir etikete atlatır.
+
+Örnek:
+DECLARE @sayi INT = 10;
+IF @sayi > 5
+    GOTO Buyuk;
+ELSE
+    GOTO Kucuk;
+
+Buyuk:
+    PRINT 'Sayı 5ten büyük';
+    GOTO Bitir;
+
+Kucuk:
+    PRINT 'Sayı 5ten küçük';
+
+Bitir:
+    PRINT 'İşlem tamamlandı';
+
+MySQL / PostgreSQL / Oracle:
+GOTO komutu **desteklenmez**. Yerine IF, WHILE veya RETURN kullanılır.
+
+---
+
+5. Dinamik SQL — Çalışma Zamanında Oluşturulan Sorgular
+
+SQL Server:
+EXEC sp_executesql veya EXEC('sorgu')
+
+Örnek:
+DECLARE @tablo NVARCHAR(50) = 'musteriler';
+DECLARE @sorgu NVARCHAR(MAX);
+SET @sorgu = 'SELECT * FROM ' + @tablo;
+EXEC sp_executesql @sorgu;
+
+Parametreli:
+DECLARE @sorgu NVARCHAR(MAX) = 'SELECT * FROM musteriler WHERE yas > @yas';
+EXEC sp_executesql @sorgu, N'@yas INT', @yas = 30;
+
+MySQL:
+PREPARE ve EXECUTE ile
+
+Örnek:
+SET @tablo = 'urunler';
+SET @sorgu = CONCAT('SELECT * FROM ', @tablo);
+PREPARE stmt FROM @sorgu;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+PostgreSQL:
+EXECUTE komutu ile
+
+Örnek:
+DO $$
+DECLARE
+    tablo TEXT := 'calisanlar';
+    sorgu TEXT;
+BEGIN
+    sorgu := 'SELECT * FROM ' || tablo;
+    EXECUTE sorgu;
+END $$;
+
+Oracle:
+EXECUTE IMMEDIATE ile
+
+Örnek:
+DECLARE
+    tablo VARCHAR2(50) := 'siparisler';
+    sorgu VARCHAR2(100);
+BEGIN
+    sorgu := 'SELECT COUNT(*) FROM ' || tablo;
+    EXECUTE IMMEDIATE sorgu;
+END;
+
+---
+
+6. İmleç (Cursor) — Satır Satır Veri İşleme
+
+SQL Server:
+DECLARE cursor_name CURSOR FOR sorgu;
+OPEN cursor_name;
+FETCH NEXT FROM cursor_name INTO değişkenler;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    ... işlemler ...
+    FETCH NEXT FROM cursor_name INTO değişkenler;
+END
+CLOSE cursor_name;
+DEALLOCATE cursor_name;
+
+Örnek:
+DECLARE @ad NVARCHAR(50), @yas INT;
+DECLARE musteriler_cursor CURSOR FOR
+    SELECT ad, yas FROM musteriler WHERE yas > 25;
+
+OPEN musteriler_cursor;
+FETCH NEXT FROM musteriler_cursor INTO @ad, @yas;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT 'Ad: ' + @ad + ', Yaş: ' + CAST(@yas AS VARCHAR);
+    FETCH NEXT FROM musteriler_cursor INTO @ad, @yas;
+END
+
+CLOSE musteriler_cursor;
+DEALLOCATE musteriler_cursor;
+
+MySQL:
+DECLARE cursor_name CURSOR FOR sorgu;
+OPEN cursor_name;
+FETCH cursor_name INTO değişkenler;
+WHILE NOT done DO
+    ... işlemler ...
+    FETCH cursor_name INTO değişkenler;
+END WHILE;
+CLOSE cursor_name;
+
+Örnek:
+DELIMITER //
+CREATE PROCEDURE Islem()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE ad VARCHAR(50);
+    DECLARE yas INT;
+    DECLARE musteriler_cursor CURSOR FOR SELECT ad, yas FROM musteriler WHERE yas > 25;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN musteriler_cursor;
+    read_loop: LOOP
+        FETCH musteriler_cursor INTO ad, yas;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        SELECT CONCAT('Ad: ', ad, ', Yaş: ', yas);
+    END LOOP;
+    CLOSE musteriler_cursor;
+END //
+DELIMITER ;
+
+PostgreSQL:
+FOR record IN sorgu LOOP ... END LOOP; (önerilen yöntem)
+
+Örnek:
+DO $$
+DECLARE
+    rec RECORD;
+BEGIN
+    FOR rec IN SELECT ad, yas FROM calisanlar WHERE yas > 30 LOOP
+        RAISE NOTICE 'Ad: %, Yaş: %', rec.ad, rec.yas;
+    END LOOP;
+END $$;
+
+Oracle:
+CURSOR ile
+
+Örnek:
+DECLARE
+    CURSOR calisan_cursor IS SELECT ad, maas FROM calisanlar WHERE maas > 4000;
+    calisan_rec calisan_cursor%ROWTYPE;
+BEGIN
+    OPEN calisan_cursor;
+    LOOP
+        FETCH calisan_cursor INTO calisan_rec;
+        EXIT WHEN calisan_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Ad: ' || calisan_rec.ad || ', Maaş: ' || calisan_rec.maas);
+    END LOOP;
+    CLOSE calisan_cursor;
+END;
+
+---
+
+7. Program İzlenebilirlik Araçları — Hata ve Loglama
+
+SQL Server:
+- PRINT — Ekrana mesaj yazdırır
+- RAISERROR — Hata mesajı oluşturur
+- TRY...CATCH — Hata yakalama
+
+Örnek:
+BEGIN TRY
+    INSERT INTO musteriler (ad, yas) VALUES ('Ali', 25);
+END TRY
+BEGIN CATCH
+    PRINT 'Hata oluştu: ' + ERROR_MESSAGE();
+END CATCH;
+
+MySQL:
+- SELECT 'mesaj' — Basit mesaj
+- SIGNAL — Hata fırlatma (MySQL 5.5+)
+
+Örnek:
+DELIMITER //
+CREATE PROCEDURE HataDeneme()
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        SELECT 'Hata oluştu!' AS Hata;
+    INSERT INTO urunler (ad, fiyat) VALUES ('Yeni Ürün', -10);
+END //
+DELIMITER ;
+
+PostgreSQL:
+- RAISE NOTICE — Bilgi mesajı
+- RAISE EXCEPTION — Hata fırlatma
+
+Örnek:
+DO $$
+BEGIN
+    RAISE NOTICE 'İşlem başlıyor...';
+    INSERT INTO calisanlar (ad, maas) VALUES ('Veli', -1000);
+EXCEPTION
+    WHEN others THEN
+        RAISE EXCEPTION 'Hata: %', SQLERRM;
+END $$;
+
+Oracle:
+- DBMS_OUTPUT.PUT_LINE — Mesaj yazdırır
+- RAISE_APPLICATION_ERROR — Hata fırlatma
+
+Örnek:
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('İşlem başlıyor...');
+    INSERT INTO siparisler (musteri_id, tarih) VALUES (999, SYSDATE);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Hata: ' || SQLERRM);
+END;
+
+---
+
+8. Yığın İşlemi (Transaction) — COMMIT ve ROLLBACK
+
+SQL Server / MySQL / PostgreSQL / Oracle:
+BEGIN TRANSACTION — İşlem başlar
+COMMIT — Değişiklikleri kalıcı yapar
+ROLLBACK — Değişiklikleri geri alır
+
+Örnek (SQL Server):
+BEGIN TRANSACTION;
+UPDATE hesaplar SET bakiye = bakiye - 100 WHERE hesap_no = 1;
+UPDATE hesaplar SET bakiye = bakiye + 100 WHERE hesap_no = 2;
+COMMIT;
+
+Hata durumunda:
+BEGIN TRANSACTION;
+UPDATE hesaplar SET bakiye = bakiye - 100 WHERE hesap_no = 1;
+UPDATE hesaplar SET bakiye = bakiye + 100 WHERE hesap_no = 2;
+IF @@ERROR <> 0
+    ROLLBACK;
+ELSE
+    COMMIT;
+
+MySQL:
+START TRANSACTION;
+UPDATE hesaplar SET bakiye = bakiye - 100 WHERE hesap_no = 1;
+UPDATE hesaplar SET bakiye = bakiye + 100 WHERE hesap_no = 2;
+COMMIT;
+
+PostgreSQL:
+BEGIN;
+UPDATE hesaplar SET bakiye = bakiye - 100 WHERE hesap_no = 1;
+UPDATE hesaplar SET bakiye = bakiye + 100 WHERE hesap_no = 2;
+COMMIT;
+
+Oracle:
+BEGIN
+    UPDATE hesaplar SET bakiye = bakiye - 100 WHERE hesap_no = 1;
+    UPDATE hesaplar SET bakiye = bakiye + 100 WHERE hesap_no = 2;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+END;
+
+---
+
+9. Veri Değişikliklerinin Kaydedilmesi — Audit ve Trigger
+
+SQL Server:
+AFTER INSERT, UPDATE, DELETE trigger ile
+
+Örnek:
+CREATE TRIGGER trg_musteri_log
+ON musteriler
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    INSERT INTO musterilog (islem, tarih, kullanici)
+    VALUES ('Değişiklik', GETDATE(), SYSTEM_USER);
+END;
+
+MySQL:
+AFTER INSERT, UPDATE, DELETE trigger
+
+Örnek:
+DELIMITER //
+CREATE TRIGGER trg_urun_log
+AFTER UPDATE ON urunler
+FOR EACH ROW
+BEGIN
+    INSERT INTO urunlog (urun_id, eski_fiyat, yeni_fiyat, tarih)
+    VALUES (OLD.id, OLD.fiyat, NEW.fiyat, NOW());
+END //
+DELIMITER ;
+
+PostgreSQL:
+AFTER INSERT, UPDATE, DELETE trigger
+
+Örnek:
+CREATE OR REPLACE FUNCTION log_urun()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO urunlog (urun_id, eski_fiyat, yeni_fiyat, tarih)
+    VALUES (OLD.id, OLD.fiyat, NEW.fiyat, NOW());
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_urun_log
+AFTER UPDATE ON urunler
+FOR EACH ROW
+EXECUTE FUNCTION log_urun();
+
+Oracle:
+AFTER INSERT, UPDATE, DELETE trigger
+
+Örnek:
+CREATE OR REPLACE TRIGGER trg_siparis_log
+AFTER INSERT ON siparisler
+FOR EACH ROW
+BEGIN
+    INSERT INTO siparislog (siparis_id, tarih, kullanici)
+    VALUES (:NEW.id, SYSDATE, USER);
+END;
+
+---
+
+10. Hata Denetimi — TRY...CATCH, Exception Handling
+
+SQL Server:
+BEGIN TRY ... END TRY
+BEGIN CATCH ... END CATCH
+
+Örnek:
+BEGIN TRY
+    INSERT INTO musteriler (ad, yas) VALUES ('Ali', -5);
+END TRY
+BEGIN CATCH
+    PRINT 'Hata: ' + ERROR_MESSAGE();
+    PRINT 'Satır: ' + CAST(ERROR_LINE() AS VARCHAR);
+END CATCH;
+
+MySQL:
+DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+
+Örnek:
+DELIMITER //
+CREATE PROCEDURE HataYakala()
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        SELECT 'Hata oluştu!' AS Hata;
+    INSERT INTO urunler (ad, fiyat) VALUES ('Yeni Ürün', -10);
+END //
+DELIMITER ;
+
+PostgreSQL:
+EXCEPTION WHEN others THEN
+
+Örnek:
+DO $$
+BEGIN
+    INSERT INTO calisanlar (ad, maas) VALUES ('Veli', -1000);
+EXCEPTION
+    WHEN others THEN
+        RAISE EXCEPTION 'Hata: %', SQLERRM;
+END $$;
+
+Oracle:
+EXCEPTION WHEN OTHERS THEN
+
+Örnek:
+BEGIN
+    INSERT INTO siparisler (musteri_id, tarih) VALUES (999, SYSDATE);
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Hata: ' || SQLERRM);
+END;
+
