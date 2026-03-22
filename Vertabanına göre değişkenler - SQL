@@ -1,0 +1,124 @@
+SQL’de @ ve @@ yapıları, değişken tanımlama ve sistem bilgisi alma açısından çok önemli. 
+Her veritabanı sistemi bu yapıları farklı şekilde kullanır.
+
+1. @ — Kullanıcı Değişkeni (User Variable)
+
+SQL Server:
+- @ ile başlayan değişkenler yerel değişkenlerdir. Sadece tanımlandığı batch, prosedür veya fonksiyon içinde geçerlidir.
+- Tanımlama: DECLARE @degisken_adi VERİ_TİPİ
+- Atama: SET @degisken_adi = değer veya SELECT @degisken_adi = sütun FROM tablo
+
+Örnek:
+DECLARE @isim NVARCHAR(50);
+SET @isim = 'Ahmet';
+SELECT @isim AS 'Ad';
+
+Not: SELECT @degisken = sütun ile sorgu sonucunu değişkene atayabilirsin. Birden fazla kayıt dönerse son kayıt değişkene atanır.
+
+MySQL:
+- @ ile başlayan değişkenler oturum (session) değişkenidir. Aynı bağlantı içinde her yerde kullanılabilir.
+- Atama: SET @degisken = değer veya SELECT @degisken := sütun FROM tablo
+
+Örnek:
+SET @yas = 25;
+SELECT @yas AS 'Yaş';
+
+Sorgu sonucunu değişkene atama:
+SELECT @toplam := SUM(fiyat) FROM siparisler;
+SELECT @toplam AS 'Toplam Fiyat';
+
+Not: MySQL’de @ değişkenleri oturum bazlıdır — başka bir bağlantıdan erişilemez. SET veya SELECT ile tanımlanabilir.
+
+PostgreSQL:
+- PostgreSQL’de @ ile değişken tanımlanmaz. Değişkenler DECLARE ile tanımlanır ve := ile atanır.
+- Kullanım: Sadece DO bloğu, fonksiyon veya prosedür içinde.
+
+Örnek:
+DO $$
+DECLARE
+    isim TEXT := 'Mehmet';
+BEGIN
+    RAISE NOTICE 'İsim: %', isim;
+END $$;
+
+Not: PostgreSQL’de @ sembolü genellikle operatör olarak kullanılır (örneğin @> — içermek operatörü), değişken değil.
+
+Oracle:
+- Oracle’da @ genellikle dosya çalıştırma veya bağlantı için kullanılır (örneğin @script.sql).
+- Değişken: VARIABLE ile tanımlanır, :degisken ile kullanılır.
+
+Örnek:
+VARIABLE ad VARCHAR2(50);
+EXEC :ad := 'Ayşe';
+PRINT ad;
+
+Not: Oracle’da @ değişken değil, komut satırı veya script çalıştırma işareti olarak kullanılır.
+
+2. @@ — Sistem Değişkeni (System Variable)
+
+SQL Server:
+- @@ ile başlayanlar sistem değişkenleridir. SQL Server’ın içsel durumunu gösterir.
+- Örnekler:
+
+@@ROWCOUNT — Son sorgunun etkilediği satır sayısını verir
+@@ERROR — Son sorguda oluşan hata kodunu verir
+@@IDENTITY — Son eklenen satırın otomatik artan ID’sini verir
+@@VERSION — SQL Server sürüm bilgisini verir
+@@SERVERNAME — Sunucu adını verir
+@@CONNECTIONS — Toplam bağlantı sayısını verir
+
+Örnek:
+SELECT @@ROWCOUNT AS 'Etkilenen Satır Sayısı';
+SELECT @@VERSION AS 'SQL Server Sürümü';
+
+Not: @@ değişkenleri okunur, değiştirilemez. Sadece bilgi verir.
+
+MySQL:
+- @@ ile başlayanlar sistem değişkenleridir. Genellikle sunucu ayarlarını gösterir.
+- Örnekler:
+
+@@version — MySQL sürümünü verir
+@@hostname — Sunucu adını verir
+@@port — Bağlantı portunu verir
+@@max_connections — Maksimum bağlantı sayısını verir
+@@autocommit — Otomatik commit ayarını verir
+
+Örnek:
+SELECT @@version AS 'MySQL Sürümü';
+SELECT @@hostname AS 'Sunucu Adı';
+
+Not: MySQL’de @@ değişkenleri genellikle okunur, bazıları SET ile değiştirilebilir (örneğin SET @@autocommit = 0;).
+
+PostgreSQL:
+- PostgreSQL’de @@ kullanılmaz. Sistem bilgileri SHOW komutu veya pg_settings tablosu ile alınır.
+- Örnek:
+
+SHOW server_version;
+SHOW max_connections;
+
+Not: PostgreSQL’de @@ sembolü yoktur. Sistem değişkenleri farklı yöntemlerle alınır.
+
+Oracle:
+- Oracle’da @@ kullanılmaz. Sistem bilgileri V$ view’leri veya SHOW PARAMETER komutu ile alınır.
+- Örnek:
+
+SHOW PARAMETER memory;
+SELECT * FROM V$VERSION;
+
+Not: Oracle’da @@ sadece script çalıştırma için kullanılır.
+
+Karşılaştırma Tablosu:
+
+Sistem — @degisken — @@degisken — Açıklama
+SQL Server — Yerel değişken — Sistem değişkeni — DECLARE ile tanımlanır, @@ okunur
+MySQL — Oturum değişkeni — Sistem değişkeni — SET @x=5, @@version gibi
+PostgreSQL — Yok (DECLARE kullanılır) — Yok — @ operatör olarak kullanılır
+Oracle — Yok (:degisken) — Yok — @ script çalıştırma için
+
+Özet:
+
+@ — Kullanıcı değişkeni (SQL Server’da yerel, MySQL’de oturum)
+@@ — Sistem değişkeni (SQL Server ve MySQL’de geçerli)
+PostgreSQL ve Oracle — @ ve @@ sembollerini değişken için kullanmaz.
+Değişkenler sadece tanımlandığı scope içinde geçerlidir.
+@@ROWCOUNT, @@ERROR gibi sistem değişkenleri hata kontrolü ve loglama için çok kullanışlıdır.
