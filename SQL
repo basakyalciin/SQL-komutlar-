@@ -1,0 +1,104 @@
+### SQL Komutları Tablosu
+
+SQL komutları kategorilere ayrılır. İşte tüm temel SQL komutları ve açıklamaları:
+
+---
+
+#### 🗂️ DDL — *Data Definition Language* (Veri Tanımlama Dili)
+
+| Komut | Açıklama |
+|-------|----------|
+| `CREATE TABLE` | Yeni bir tablo oluşturur |
+| `ALTER TABLE` | Mevcut tablonun yapısını değiştirir |
+| `DROP TABLE` | Tabloyu tamamen siler |
+| `TRUNCATE TABLE` | Tablodaki tüm verileri siler, yapıyı korur |
+| `CREATE DATABASE` | Yeni bir veritabanı oluşturur |
+| `DROP DATABASE` | Veritabanını tamamen siler |
+| `CREATE INDEX` | Sorgu hızını artırmak için index oluşturur |
+| `DROP INDEX` | Mevcut bir index'i siler |
+| `CREATE VIEW` | Sorguya dayalı sanal bir tablo (view) oluşturur |
+| `DROP VIEW` | Mevcut bir view'i siler |
+| `CREATE SCHEMA` | Yeni bir şema oluşturur |
+| `RENAME` | Tablo veya sütun adını değiştirir |
+
+---
+
+#### ✏️ DML — *Data Manipulation Language* (Veri İşleme Dili)
+
+| Komut | Açıklama |
+|-------|----------|
+| `SELECT` | Tablodan veri sorgular / çeker |
+| `INSERT INTO` | Tabloya yeni veri ekler |
+| `UPDATE` | Mevcut veriyi günceller |
+| `DELETE` | Tablodan veri siler |
+| `MERGE` | İki tabloyu karşılaştırıp INSERT/UPDATE/DELETE işlemi yapar |
+| `CALL` | Saklı yordam (stored procedure) çağırır |
+| `EXPLAIN` | Sorgunun nasıl çalıştığını açıklar (sorgu planı) |
+| `LOCK TABLE` | Tabloyu kilitler, eş zamanlı erişimi engeller |
+
+---
+
+#### 🔍 DQL — *Data Query Language* (Veri Sorgulama Dili)
+
+| Komut | Açıklama |
+|-------|----------|
+| `SELECT` | Veritabanından veri seçer ve getirir |
+| `WHERE` | Sorguya koşul ekler |
+| `ORDER BY` | Sonuçları sıralar (ASC / DESC) |
+| `GROUP BY` | Sonuçları belirli bir sütuna göre gruplar |
+| `HAVING` | GROUP BY ile kullanılan filtre koşuludur |
+| `DISTINCT` | Tekrar eden kayıtları filtreler, benzersiz sonuç döner |
+| `LIMIT / TOP / FETCH` | Dönen kayıt sayısını sınırlar |
+| `LIKE` | Belirli bir desene göre arama yapar |
+| `IN` | Birden fazla değerle eşleşme kontrolü yapar |
+| `BETWEEN` | İki değer arasındaki kayıtları getirir |
+| `IS NULL` | Değeri boş olan kayıtları filtreler |
+| `EXISTS` | Alt sorgunun sonuç döndürüp döndürmediğini kontrol eder |
+
+---
+
+#### 🔗 JOIN Komutları
+
+| Komut | Açıklama |
+|-------|----------|
+| `INNER JOIN` | Her iki tabloda eşleşen kayıtları getirir |
+| `LEFT JOIN` | Sol tablodaki tüm kayıtlar + sağdan eşleşenler |
+| `RIGHT JOIN` | Sağ tablodaki tüm kayıtlar + soldan eşleşenler |
+| `FULL OUTER JOIN` | Her iki tablodaki tüm kayıtları getirir |
+| `CROSS JOIN` | İki tablonun kartezyen çarpımını alır |
+| `SELF JOIN` | Bir tabloyu kendisiyle birleştirir |
+
+---
+
+#### 🔐 DCL — *Data Control Language* (Veri Kontrol Dili)
+
+| Komut | Açıklama |
+|-------|----------|
+| `GRANT` | Kullanıcıya yetki verir |
+| `REVOKE` | Kullanıcıdan yetkiyi geri alır |
+| `DENY` | Belirli bir işlemi açıkça reddeder |
+
+---
+
+ ### TCL — *Transaction Control Language* (İşlem Kontrol Dili)
+
+| Komut | Açıklama |
+|-------|----------|
+| `BEGIN` | Yeni bir transaction (işlem) başlatır |
+| `COMMIT` | Transaction'ı kalıcı olarak kaydeder |
+| `ROLLBACK` | Transaction'ı geri alır, değişiklikleri iptal eder |
+| `SAVEPOINT` | Transaction içinde geri dönülecek bir nokta belirler |
+| `RELEASE SAVEPOINT` | Belirtilen savepoint'i siler |
+| `SET TRANSACTION` | Transaction özelliklerini ayarlar |
+
+---
+
+#### 📊 Aggregate (Toplama) Fonksiyonları
+
+| Komut | Açıklama |
+|-------|----------|
+| `COUNT()` | Kayıt sayısını döner |
+| `SUM()` | Sayısal değerlerin toplamını döner |
+| `AVG()` | Ortalama değeri döner |
+| `MIN()` | En küçük değeri döner |
+| `MAX()` | En büyük değeri döner |
